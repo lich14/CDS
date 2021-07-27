@@ -90,8 +90,14 @@ def get_mixer_args(args):
         args.weighted_head = True
 
     if args.env == '3_vs_2':
-        args.alpha = 0.1
+        args.beta1 = 2.0
+        args.beta2 = 2.0
+        
+        args.alpha = 0.3
         args.epsilon_anneal_time = 50000
+        args.start_anneal_time = 1500000
+        args.anneal_rate = 0.3
+        
     elif args.env == '4_vs_3':
         args.alpha = 0.8
     elif args.env == '3_vs_2_full':
