@@ -1,12 +1,16 @@
-# Run an experiment
+
+## Run an experiment 
+
+```shell
+python3 main.py --config=CDS_QPLEX --env-config=academy_3_vs_1_with_keeper 
 ```
-python3 main.py --env '3_vs_2'
-```
 
-## Used scenarios in the paper
---env
-1.  '3_vs_2'
-2.  '4_vs_3'
-3.  '3_vs_2_full'
+The config files act as defaults for an algorithm or environment. 
 
+They are all located in `config`.
+`--config` refers to the config files in `config/algs`
+`--env-config` refers to the config files in `config/envs`
 
+## Data
+
+GRF data is located in 'data', where we show the performance of CDS with QPLEX or QMIX.

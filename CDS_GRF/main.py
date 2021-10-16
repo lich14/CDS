@@ -1,84 +1,100 @@
-# -*- coding: utf-8 -*-
-import gym
-import torch
 import numpy as np
-from env.wrapper_grf_3vs1 import make_football_env_3vs1
-from env.wrapper_grf_3_vs_2_full import make_football_env_3vs2_full
-from env.wrapper_grf_4_vs_2_full import make_football_env_4vs2_full
-from env.wrapper_grf_4vs2 import make_football_env_4vs2
-from env.wrapper_grf_4vs3 import make_football_env_4vs3
-from env.wrapper_grf_4vs5 import make_football_env_4vs5
-from env.wrapper_grf_11vs4 import make_football_env_11vs4
-from env.wrapper_grf_5vs5 import make_football_env_5vs5
-from runner import Runner
-from common.arguments import get_common_args, get_mixer_args
+import os
+import collections
+from os.path import dirname, abspath
+from copy import deepcopy
+from sacred import Experiment, SETTINGS
+from sacred.observers import FileStorageObserver
+from sacred.utils import apply_backspaces_and_linefeeds
+import sys
+import torch as th
+from utils.logging import get_logger
+import yaml
+
+from run import run
+
+# set to "no" if you want to see stdout/stderr in console
+SETTINGS['CAPTURE_MODE'] = "fd"
+logger = get_logger()
+
+ex = Experiment("pymarl")
+ex.logger = logger
+ex.captured_out_filter = apply_backspaces_and_linefeeds
+
+results_path = os.path.join(dirname(dirname(abspath(__file__))), "results")
 
 
-def setup_seed(seed):
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = True
-    torch.set_num_threads(8)
+@ex.main
+def my_main(_run, _config, _log):
+    # Setting the random seed throughout the modules
+    config = config_copy(_config)
+    np.random.seed(config["seed"])
+    th.manual_seed(config["seed"])
+    config['env_args']['seed'] = config["seed"]
+
+    # run the framework
+    run(_run, config, _log)
 
 
-def get_env(args):
-    if 'pacmen' in args.env:
-        env = gym.make(args.env)
-        env.seed(args.seed)
+def _get_config(params, arg_name, subfolder):
+    config_name = None
+    for _i, _v in enumerate(params):
+        if _v.split("=")[0] == arg_name:
+            config_name = _v.split("=")[1]
+            del params[_i]
+            break
 
-    elif args.env == '3_vs_2':
-        # google research football
-        env = make_football_env_3vs1(dense_reward=False)
+    if config_name is not None:
+        with open(os.path.join(os.path.dirname(__file__), "config", subfolder, "{}.yaml".format(config_name)), "r") as f:
+            try:
+                config_dict = yaml.load(f)
+            except yaml.YAMLError as exc:
+                assert False, "{}.yaml error: {}".format(config_name, exc)
+        return config_dict
 
-    elif args.env == '3_vs_2_full':
-        # google research football
-        env = make_football_env_3vs2_full(dense_reward=False)
 
-    elif args.env == '4_vs_2_full':
-        # google research football
-        env = make_football_env_4vs2_full(dense_reward=False)
+def recursive_dict_update(d, u):
+    for k, v in u.items():
+        if isinstance(v, collections.Mapping):
+            d[k] = recursive_dict_update(d.get(k, {}), v)
+        else:
+            d[k] = v
+    return d
 
-    elif args.env == '4_vs_2':
-        # google research football
-        env = make_football_env_4vs2(dense_reward=False)
 
-    elif args.env == '4_vs_3':
-        # google research football
-        env = make_football_env_4vs3(dense_reward=False)
-
-    elif args.env == '4_vs_5':
-        # google research football
-        env = make_football_env_4vs5(dense_reward=False)
-
-    elif args.env == '11_vs_4':
-        # google research football
-        env = make_football_env_11vs4(dense_reward=False)
-
-    elif args.env == '5_vs_5':
-        # google research football
-        env = make_football_env_5vs5(dense_reward=False)
-
-    return env
+def config_copy(config):
+    if isinstance(config, dict):
+        return {k: config_copy(v) for k, v in config.items()}
+    elif isinstance(config, list):
+        return [config_copy(v) for v in config]
+    else:
+        return deepcopy(config)
 
 
 if __name__ == '__main__':
-    args = get_common_args()
-    args = get_mixer_args(args)
-    import random
-    args.seed = random.randint(0, 1000000)
-    setup_seed(args.seed)
-    env = get_env(args)
+    params = deepcopy(sys.argv)
+    th.set_num_threads(16)
 
-    env_info = env.get_env_info()
-    args.n_actions = env_info["n_actions"]
-    args.n_agents = env_info["n_agents"]
-    args.state_shape = env_info["state_shape"]
-    args.obs_shape = env_info["obs_shape"]
-    args.episode_limit = env_info["episode_limit"]
-    args.reuse_network = False
+    # Get the defaults from default.yaml
+    with open(os.path.join(os.path.dirname(__file__), "config", "default.yaml"), "r") as f:
+        try:
+            config_dict = yaml.load(f)
+        except yaml.YAMLError as exc:
+            assert False, "default.yaml error: {}".format(exc)
 
-    runner = Runner(env, args)
-    runner.run(0)
-    env.close()
+    # Load algorithm and env base configs
+    env_config = _get_config(params, "--env-config", "envs")
+    alg_config = _get_config(params, "--config", "algs")
+    # config_dict = {**config_dict, **env_config, **alg_config}
+    config_dict = recursive_dict_update(config_dict, env_config)
+    config_dict = recursive_dict_update(config_dict, alg_config)
+
+    # now add all the config to sacred
+    ex.add_config(config_dict)
+
+    # Save to disk by default for sacred
+    logger.info("Saving to FileStorageObserver in results/sacred.")
+    file_obs_path = os.path.join(results_path, "sacred")
+    ex.observers.append(FileStorageObserver.create(file_obs_path))
+
+    ex.run_commandline(params)

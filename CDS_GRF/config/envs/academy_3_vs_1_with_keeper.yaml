@@ -1,0 +1,29 @@
+env: academy_3_vs_1_with_keeper # google research football
+
+env_args:
+  dense_reward: False
+  write_full_episode_dumps: False
+  write_goal_dumps: False
+  dump_freq: 1000
+  render: False
+  n_agents: 3
+  time_limit: 150
+  time_step: 0
+  obs_dim: 26
+  env_name: "academy_3_vs_1_with_keeper"
+  stacked: False
+  representation: "simple115"
+  rewards: "scoring"
+  logdir: "football_dumps"
+  write_video: True
+  number_of_right_players_agent_controls: 0
+  seed: 0
+
+batch_size: 8
+test_greedy: True
+test_nepisode: 32
+test_interval: 10000
+log_interval: 10000
+runner_log_interval: 10000
+learner_log_interval: 10000
+t_max: 4050000

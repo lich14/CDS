@@ -1,0 +1,51 @@
+# --- Qatten specific parameters ---
+
+# use epsilon greedy action selector
+action_selector: "epsilon_greedy"
+epsilon_start: 1.0
+epsilon_finish: 0.05
+epsilon_anneal_time: 50000
+
+runner: "episode"
+
+buffer_size: 5000
+
+# update the target network every {} episodes
+target_update_interval: 200
+
+# use the Q_Learner to train
+agent_output_type: "q"
+learner: "CDS_QPLEX"
+double_q: True
+mixer: "dmaq_qatten"
+mixing_embed_dim: 32
+hypernet_embed: 64
+adv_hypernet_layers: 1
+adv_hypernet_embed: 64
+
+num_kernel: 4
+is_minus_one: True
+is_adv_attention: True
+is_stop_gradient: True
+
+n_head: 4 # attention head number
+attend_reg_coef: 0.001 # attention regulation coefficient  # For MMM2 and 3s5z_vs_3s6z, it is 0.001
+state_bias: True # the constant value c(s) in the paper
+mask_dead: False
+weighted_head: False # weighted head Q-values, for MMM2 and 3s5z_vs_3s6z, it is True
+nonlinear: False # non-linearity, for MMM2, it is True
+
+burn_in_period: 100
+on_policy_batch: 16
+predict_epoch: 25
+predict_net_dim: 128
+
+beta1: 0.5
+beta2: 1.0
+beta: 0.05
+ifaver: True
+ifon_sample: False
+ifaddobs: True
+
+alpha: 0.6
+name: "cds_qplex_prior"
