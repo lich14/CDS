@@ -2,14 +2,16 @@
 ## Run an experiment 
 
 ```shell
-python3 main.py --config=CDS_QPLEX --env-config=academy_3_vs_1_with_keeper 
+python3 main.py --config=CDS_QMIX --env-config=academy_3_vs_1_with_keeper 
 ```
 
 The config files act as defaults for an algorithm or environment. 
 
 They are all located in `config`.
-`--config` refers to the config files in `config/algs`
-`--env-config` refers to the config files in `config/envs`
+
+`--config` refers to the config files in `config/algs`, one can choose CDS_QMIX or CDS_QPLEX
+
+`--env-config` refers to the config files in `config/envs`, one can choose academy_3_vs_1_with_keeper or academy_counterattack_hard
 
 ## Data
 
