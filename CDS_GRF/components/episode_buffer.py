@@ -187,10 +187,10 @@ class EpisodeBatch:
         parsed = []
         # Only batch slice given, add full time slice
         if (isinstance(items, slice)  # slice a:b
-                    or isinstance(items, int)  # int i
-                    # [a,b,c]
+            or isinstance(items, int)  # int i
+            # [a,b,c]
                     or (isinstance(items, (list, np.ndarray, th.LongTensor, th.cuda.LongTensor)))
-                ):
+            ):
             items = (items, slice(None))
 
         # Need the time indexing to be contiguous
@@ -254,7 +254,18 @@ class ReplayBuffer(EpisodeBatch):
 
     def on_policy_sample(self, batch_size):
         assert self.episodes_in_buffer >= batch_size
-        return self[self.episodes_in_buffer - batch_size: self.episodes_in_buffer]
+
+        if self.buffer_index - batch_size >= 0:
+            data = self[self.buffer_index - batch_size: self.buffer_index]
+        else:
+            remain_length = batch_size - self.buffer_index
+            data = self[self.buffer_size - remain_length + 1:]
+            data_add = self[:self.buffer_index]
+            for k, v in data.data.transition_data.items():
+                data.data.transition_data[k] = th.cat(
+                    [data.data.transition_data[k], data_add.data.transition_data[k]], dim=0)
+
+        return data
 
     def sample(self, batch_size):
         assert self.on_policy_can_sample(batch_size)
