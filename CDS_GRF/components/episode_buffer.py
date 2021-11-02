@@ -187,10 +187,10 @@ class EpisodeBatch:
         parsed = []
         # Only batch slice given, add full time slice
         if (isinstance(items, slice)  # slice a:b
-            or isinstance(items, int)  # int i
-            # [a,b,c]
+                    or isinstance(items, int)  # int i
+                    # [a,b,c]
                     or (isinstance(items, (list, np.ndarray, th.LongTensor, th.cuda.LongTensor)))
-            ):
+                ):
             items = (items, slice(None))
 
         # Need the time indexing to be contiguous
