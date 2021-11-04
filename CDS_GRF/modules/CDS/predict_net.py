@@ -19,7 +19,7 @@ def weights_init_(m):
 
 class Predict_Network(nn.Module):
 
-    def __init__(self, num_inputs, hidden_dim, num_outputs, lr=1e-3):
+    def __init__(self, num_inputs, hidden_dim, num_outputs, lr=3e-4):
         super(Predict_Network, self).__init__()
 
         self.linear1 = nn.Linear(num_inputs, hidden_dim)
@@ -64,7 +64,7 @@ class Predict_Network(nn.Module):
 
 class Predict_Network_WithID(nn.Module):
 
-    def __init__(self, num_inputs, hidden_dim, num_outputs, n_agents, lr=1e-3):
+    def __init__(self, num_inputs, hidden_dim, num_outputs, n_agents, lr=3e-4):
         super(Predict_Network_WithID, self).__init__()
 
         self.linear1 = nn.Linear(num_inputs, hidden_dim)
