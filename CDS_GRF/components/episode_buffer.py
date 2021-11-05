@@ -265,6 +265,8 @@ class ReplayBuffer(EpisodeBatch):
                 data.data.transition_data[k] = th.cat(
                     [data.data.transition_data[k], data_add.data.transition_data[k]], dim=0)
 
+            data.batch_size = data.batch_size + data_add.batch_size
+
         return data
 
     def sample(self, batch_size):
