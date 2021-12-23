@@ -10,10 +10,11 @@ This codebase accompanies the paper submission "Celebrating Diversity in Shared 
 
 If you find this repository useful, please cite our paper:
 ```
-@article{li2021celebrating,
+@article{chenghao2021celebrating,
   title={Celebrating Diversity in Shared Multi-Agent Reinforcement Learning},
-  author={Li, Chenghao and Wu, Chengjie and Wang, Tonghan and Yang, Jun and Zhao, Qianchuan and Zhang, Chongjie},
-  journal={arXiv preprint arXiv:2106.02195},
+  author={Li, Chenghao and Wang, Tonghan and Wu, Chengjie and Zhao, Qianchuan and Yang, Jun and Zhang, Chongjie},
+  journal={Advances in Neural Information Processing Systems},
+  volume={34},
   year={2021}
 }
 ```
