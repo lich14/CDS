@@ -23,21 +23,15 @@ class CustomEnv(gym.Env):
             self,
             n_agents: int,
             mode: str,
-            env_name: str,
-            seed=0,
     ):
         super(CustomEnv, self).__init__()
         sa_action_space = spaces.Discrete(N_DISCRETE_ACTIONS)
         self.action_space = spaces.Tuple(tuple(n_agents * [sa_action_space]))
-        self.env_name = env_name
-        self.seed = seed
 
-        sa_obs_space = spaces.Box(low=-5, high=5, shape=(
-            (2 * N_OBSERVATION_SCALE + 1) * (2 * N_OBSERVATION_SCALE + 1),), dtype=np.uint8)
+        sa_obs_space = spaces.Box(low=-5, high=5, shape=((2 * N_OBSERVATION_SCALE + 1) * (2 * N_OBSERVATION_SCALE + 1),), dtype=np.uint8)
         self.observation_space = spaces.Tuple(tuple(n_agents * [sa_obs_space]))
 
         self.n_agents = n_agents
-        self.n_actions = 5
         # Here initial maze with tini size
         # TODO: add more suitable environments
 
@@ -51,53 +45,27 @@ class CustomEnv(gym.Env):
         self.mode = mode
         self.init_env_matrix()
         self.time_limit = 100
-        self.episode_limit = self.time_limit
         self.time_step = 0
-        self.button_on = False
         self.state_shape = 3 * 5 * 4 + self.prop * (1 + 2 + 2 + 3) + 3 * 3
 
     def init_reward_point_withdiff_mode(self):
         if self.mode == 'tini':
-            self.reward_point_set_current += self.init_reward_point(
-                4, 3, 3, 2, 9)
-            self.reward_point_set_current += self.init_reward_point(
-                4, 3, 3, 15, 9)
-            self.reward_point_set_current += self.init_reward_point(
-                3, 4, 3, 10, 15)
-            self.reward_point_set_current += self.init_reward_point(
-                3, 4, 3, 10, 2)
+            self.reward_point_set_current += self.init_reward_point(4, 3, 3, 2, 9)
+            self.reward_point_set_current += self.init_reward_point(4, 3, 3, 15, 9)
+            self.reward_point_set_current += self.init_reward_point(3, 4, 3, 10, 15)
+            self.reward_point_set_current += self.init_reward_point(3, 4, 3, 10, 2)
 
         elif self.mode == 'small':
-            self.reward_point_set_current += self.init_reward_point(
-                4, 3, 3, 2, 11)
-            self.reward_point_set_current += self.init_reward_point(
-                4, 3, 3, 19, 11)
-            self.reward_point_set_current += self.init_reward_point(
-                3, 4, 3, 13, 19)
-            self.reward_point_set_current += self.init_reward_point(
-                3, 4, 3, 13, 2)
+            self.reward_point_set_current += self.init_reward_point(4, 3, 3, 2, 11)
+            self.reward_point_set_current += self.init_reward_point(4, 3, 3, 19, 11)
+            self.reward_point_set_current += self.init_reward_point(3, 4, 3, 13, 19)
+            self.reward_point_set_current += self.init_reward_point(3, 4, 3, 13, 2)
 
         elif self.mode == 'large':
-            self.reward_point_set_current += self.init_reward_point(
-                4, 3, 3, 2, 15)
-            self.reward_point_set_current += self.init_reward_point(
-                4, 3, 3, 27, 15)
-            self.reward_point_set_current += self.init_reward_point(
-                3, 4, 3, 19, 27)
-            self.reward_point_set_current += self.init_reward_point(
-                3, 4, 3, 19, 2)
-
-    def init_button(self):
-        assert self.mode == 'small'
-        self.button_point = [np.random.randint(
-            3) + 13, np.random.randint(3) + 11]
-        self.env_matrix[self.button_point[0],
-                        self.button_point[1]] = REWARD_POINT
-
-    def reset_button(self):
-        self.env_matrix[self.button_point[0],
-                        self.button_point[1]] = 0
-        self.init_button()
+            self.reward_point_set_current += self.init_reward_point(4, 3, 3, 2, 15)
+            self.reward_point_set_current += self.init_reward_point(4, 3, 3, 20, 15)
+            self.reward_point_set_current += self.init_reward_point(3, 4, 3, 19, 27)
+            self.reward_point_set_current += self.init_reward_point(3, 4, 3, 19, 2)
 
     def init_env_matrix(self):
         if self.mode == 'tini':
@@ -145,7 +113,6 @@ class CustomEnv(gym.Env):
 
             # third initial agents
             self.init_agent_point(3, 3, 13, 11)
-            self.init_button()
             self.prop = 2
             self.center = [14, 12]
 
@@ -177,8 +144,7 @@ class CustomEnv(gym.Env):
         assert (length != 0 and wide != 0 and num != 0)
         point_set = []
         while len(point_set) != num:
-            point = [np.random.randint(
-                length) + init_length, np.random.randint(wide) + init_wide]
+            point = [np.random.randint(length) + init_length, np.random.randint(wide) + init_wide]
             if point not in point_set:
                 point_set.append(point)
 
@@ -191,8 +157,7 @@ class CustomEnv(gym.Env):
         assert (length != 0 and wide != 0)
         point_set = []
         while len(point_set) != self.n_agents:
-            point = [np.random.randint(
-                length) + init_length, np.random.randint(wide) + init_wide]
+            point = [np.random.randint(length) + init_length, np.random.randint(wide) + init_wide]
             if point not in point_set:
                 point_set.append(point)
 
@@ -218,14 +183,8 @@ class CustomEnv(gym.Env):
         assert (len(action) == self.n_agents)
         eaten_reward_points = []
         eaten_reward_points_array = []
-        return_reward = -0.02 * np.ones(5)
+        return_reward = -0.025 * np.ones(4)
         self.time_step += 1
-        self.button_on = False
-
-        for id in range(self.n_agents):
-            if self.agent_position[id][0] == self.button_point[0] and self.agent_position[id][1] == self.button_point[1]:
-                if action[id] == 4:
-                    self.button_on = True
 
         for id, item in enumerate(action):
             # first analyse
@@ -251,35 +210,25 @@ class CustomEnv(gym.Env):
                 ifeat = True
 
             else:
-                raise (
-                    print(f'wrong action label: agent{id} action is {item}'))
+                raise (print(f'wrong action label: agent{id} action is {item}'))
 
             next_state = self.agent_position[id] + delta_xy
             if self.env_matrix[next_state[0], next_state[1]] != WALL:
                 # check if next state is in the wall
                 self.agent_position[id] = next_state
 
-            if ifeat and self.button_on:
+            if ifeat:
                 if self.env_matrix[self.agent_position[id][0], self.agent_position[id][1]] == REWARD_POINT:
-                    if self.agent_position[id][0] == self.button_point[0] and self.agent_position[id][1] == self.button_point[1]:
-                        # turn on the button
-                        pass
-
-                    else:
-                        # this agent want to eat the reward point
-                        eaten_reward_points.append(
-                            [id, self.agent_position[id]])
-                        eaten_reward_points_array.append(
-                            self.agent_position[id])
+                    # this agent want to eat the reward point
+                    eaten_reward_points.append([id, self.agent_position[id]])
+                    eaten_reward_points_array.append(self.agent_position[id])
 
         eaten_reward_points_array = np.array(eaten_reward_points_array)
 
         # exclude more then one agents eat the same reward point
         for item in eaten_reward_points:
-            index_0 = np.where(
-                eaten_reward_points_array[:, 0] == item[1][0])[0]
-            index_1 = np.where(
-                eaten_reward_points_array[index_0, 1] == item[1][1])[0]
+            index_0 = np.where(eaten_reward_points_array[:, 0] == item[1][0])[0]
+            index_1 = np.where(eaten_reward_points_array[index_0, 1] == item[1][1])[0]
             return_reward[item[0]] = 1 / len(index_1)
             # more agents choose to eat the same reward point
             # then the reward get by each agent shrinks proportionally
@@ -290,9 +239,6 @@ class CustomEnv(gym.Env):
             if item[1].tolist() in self.reward_point_set_current:
                 self.reward_point_set_current.remove(item[1].tolist())
 
-        if self.time_step % 20 == 0:
-            self.reset_button()
-
         done = False
         if self.time_step >= self.time_limit:
             # done only if time steps exceed limitation
@@ -302,11 +248,11 @@ class CustomEnv(gym.Env):
             # regenerate reward points
             self.init_reward_point_withdiff_mode()
 
-        self.obs = tuple([self.get_local_observation(i)
-                         for i in range(self.n_agents)])
+        next_obs = tuple([self.get_local_observation(i) for i in range(self.n_agents)])
+        next_state = self.get_global_observation()
         info = {}
 
-        return return_reward.sum(), done, info
+        return next_obs, next_state, return_reward.sum(), done, info
 
     def get_local_observation(self, id):
         current_position = self.agent_position[id]
@@ -314,42 +260,35 @@ class CustomEnv(gym.Env):
         min_index_0 = current_position[0] - N_OBSERVATION_SCALE
         min_index_1 = current_position[1] - N_OBSERVATION_SCALE
 
-        obs = self.env_matrix[min_index_0:min_index_0 +
-                              length, min_index_1:min_index_1 + length].copy()
+        obs = self.env_matrix[min_index_0:min_index_0 + length, min_index_1:min_index_1 + length].copy()
         for i in range(self.n_agents):
             if i != id:
                 other_agent_position = self.agent_position[i]
                 if other_agent_position[0] >= min_index_0 and other_agent_position[0] < min_index_0 + length:
                     if other_agent_position[1] >= min_index_1 and other_agent_position[1] < min_index_1 + length:
-                        obs[other_agent_position[0] -
-                            min_index_0][other_agent_position[1] - min_index_1] += AGENT_POINT
+                        obs[other_agent_position[0] - min_index_0][other_agent_position[1] - min_index_1] = AGENT_POINT
 
         return obs.reshape(-1)
 
     def get_global_observation(self):
         env_matrix_withagent = self.env_matrix.copy()
         for pos in self.agent_position:
-            env_matrix_withagent[pos[0], pos[1]] += AGENT_POINT
+            env_matrix_withagent[pos[0], pos[1]] = AGENT_POINT
 
-        center_matrix = env_matrix_withagent[self.center[0] -
-                                             1:self.center[0] + 2, self.center[1] - 1:self.center[1] + 2]
-        down_path = env_matrix_withagent[self.center[0] +
-                                         2:self.center[0] + 2 + self.prop * 1, self.center[1]]
+        center_matrix = env_matrix_withagent[self.center[0] - 1:self.center[0] + 2, self.center[1] - 1:self.center[1] + 2]
+        down_path = env_matrix_withagent[self.center[0] + 2:self.center[0] + 2 + self.prop * 1, self.center[1]]
         down_room = env_matrix_withagent[self.center[0] + 2 + self.prop * 1:self.center[0] + 2 + self.prop * 1 + 5, self.center[1] -
                                          1:self.center[1] + 2]
 
-        right_path = env_matrix_withagent[self.center[0],
-                                          self.center[1] + 2:self.center[1] + 2 + self.prop * 2]
+        right_path = env_matrix_withagent[self.center[0], self.center[1] + 2:self.center[1] + 2 + self.prop * 2]
         right_room = env_matrix_withagent[self.center[0] - 1:self.center[0] + 2, self.center[1] + 2 + self.prop * 2:self.center[1] + 2 +
                                           self.prop * 2 + 5]
 
-        up_path = env_matrix_withagent[self.center[0] - 1 -
-                                       self.prop * 3:self.center[0] - 1, self.center[1]]
+        up_path = env_matrix_withagent[self.center[0] - 1 - self.prop * 3:self.center[0] - 1, self.center[1]]
         up_room = env_matrix_withagent[self.center[0] - 1 - self.prop * 3 - 5:self.center[0] - 1 - self.prop * 3, self.center[1] -
                                        1:self.center[1] + 2]
 
-        left_path = env_matrix_withagent[self.center[0],
-                                         self.center[1] - 2 - self.prop * 2:self.center[1] - 2]
+        left_path = env_matrix_withagent[self.center[0], self.center[1] - 2 - self.prop * 2:self.center[1] - 2]
         left_room = env_matrix_withagent[self.center[0] - 1:self.center[0] + 2, self.center[1] - 1 - self.prop * 2 - 5:self.center[1] - 1 -
                                          self.prop * 2]
 
@@ -369,48 +308,10 @@ class CustomEnv(gym.Env):
         # Reset the state of the environment to an initial state
         self.init_env_matrix()
         self.time_step = 0
-        self.obs = tuple([self.get_local_observation(i)
-                          for i in range(self.n_agents)])
+        obs = tuple([self.get_local_observation(i) for i in range(self.n_agents)])
         state = self.get_global_observation()
 
-        return self.obs, state
-
-    def get_global_state(self):
-        return self.get_global_observation()
-
-    def get_obs(self):
-        """Returns all agent observations in a list."""
-        # obs = np.array([self.get_simple_obs(i) for i in range(self.n_agents)])
-        return self.obs
-
-    def get_obs_agent(self, agent_id):
-        """Returns observation for agent_id."""
-        return self.obs[agent_id]
-
-    def get_obs_size(self):
-        """Returns the size of the observation."""
-        return (N_OBSERVATION_SCALE * 2 + 1) * (N_OBSERVATION_SCALE * 2 + 1)
-
-    def get_state(self):
-        """Returns the global state."""
-        return self.get_global_state()
-
-    def get_state_size(self):
-        """Returns the size of the global state."""
-        # TODO: in wrapper_grf_3vs1.py, author set state_shape=obs_shape
-        return self.state_shape
-
-    def get_avail_actions(self):
-        """Returns the available actions of all agents in a list."""
-        return [[1 for _ in range(self.n_actions)] for agent_id in range(self.n_agents)]
-
-    def get_avail_agent_actions(self, agent_id):
-        """Returns the available actions for agent_id."""
-        return self.get_avail_actions()[agent_id]
-
-    def get_total_actions(self):
-        """Returns the total number of actions an agent could ever take."""
-        return 5
+        return obs, state
 
     def render(self, mode='human', close=False):
         # Render the environment to the screen
@@ -425,18 +326,9 @@ class CustomEnv(gym.Env):
     def get_env_info(self):
         output_dict = {}
         output_dict['n_actions'] = 5
-        output_dict['n_agents'] = 5
+        output_dict['n_agents'] = 4
         output_dict['state_shape'] = self.state_shape
-        output_dict['obs_shape'] = (
-            N_OBSERVATION_SCALE * 2 + 1) * (N_OBSERVATION_SCALE * 2 + 1)
-        output_dict['unit_dim'] = output_dict['obs_shape']
+        output_dict['obs_shape'] = (N_OBSERVATION_SCALE * 2 + 1) * (N_OBSERVATION_SCALE * 2 + 1)
         output_dict['episode_limit'] = self.time_limit
 
         return output_dict
-
-
-if __name__ == '__main__':
-    a = CustomEnv(5, 'large')
-    print(a.env_matrix[19:22, 15:18])
-    a.reset_button()
-    print(a.env_matrix[19:22, 15:18])
