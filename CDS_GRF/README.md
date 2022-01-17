@@ -15,7 +15,7 @@ They are all located in `config`.
 
 ## Data
 
-GRF data is located in 'data', where we show the performance of CDS with QPLEX or QMIX.
+GRF data is located in 'data', where we show the performance of CDS with QPLEX or QMIX (CDS + QMIX is recommended for GRF).
 
 ## Scenario
 We delete agents initialized in our half in the 'academy counterattack hard' scenario, which is located in 'data/academy_counterattack_hard.py'.
