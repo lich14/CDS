@@ -4,7 +4,6 @@
 action_selector: "epsilon_greedy"
 epsilon_start: 1.0
 epsilon_finish: 0.05
-epsilon_anneal_time: 500000
 
 runner: "episode"
 
