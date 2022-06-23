@@ -4,7 +4,7 @@ env_args:
   continuing_episode: False
   difficulty: "7"
   game_version: null
-  map_name: "5m_vs_6m"
+  map_name: "3s_vs_5z"
   move_amount: 2
   obs_all_health: True
   obs_instead_of_state: False
